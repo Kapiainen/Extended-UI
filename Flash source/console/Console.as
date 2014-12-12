@@ -262,14 +262,6 @@ class Console extends MovieClip
 					var exuiCommand: String = CommandEntry.text.substr(5).toLowerCase();
 					if(exuiCommand == "fullscreen") {
 						setFullscreen();
-						/*
-						Background._height = Stage.height * 2;
-						CurrentCell._y = -Stage.height;
-						CurrentSelection._y = CurrentCell._y + CurrentCell._height;
-						CommandHistory._y = CurrentSelection._y + CurrentSelection._height;
-						CommandHistory._height = Math.abs(CommandEntry._y - CommandHistory._y);
-						*/
-						
 						ResetCommandEntry();
 						return;
 					} else if(exuiCommand == "help") {
@@ -350,12 +342,6 @@ class Console extends MovieClip
 
 	public function setCurrentCell(/* values */): Void
 	{
-		/*
-		arguments[1] = arguments[1].toString(16).toUpperCase();
-		while(arguments[1].length < 8) {
-			arguments[1] = "0" + arguments[1];
-		}
-		*/
 		arguments[1] = generateFormID(arguments[1]);
 		if (Console.ConsoleInstance != null) 
 			Console.ConsoleInstance.CurrentCell.text = "Current cell: '" + arguments[0] + "' (FormID " + arguments[1] + ")";
