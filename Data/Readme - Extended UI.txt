@@ -1,5 +1,5 @@
 Extended UI
-Version: 1.0.5
+Version: 1.1.0
 Author: MrJack
 
 Table of contents
@@ -85,9 +85,9 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 
 --Changelog--
-1.05:
+1.1.0:
 	- Added option in MCM to set the aspect ratio of the stats menu. Currently only used to adjust the placement of skill markers at the bottom of the screen. Default is 16:9.
-	- Hopefully fixed a bug that can cause a variable to not be assigned a value and thus cause error messages in the Papyrus log.
+	- Hopefully fixed a bug that could cause a variable to not be assigned a value and thus cause error messages in the Papyrus log.
 	- Fixed a bug that caused a perk's required skill level to not be shown, if the skill's name was too long (around 14 characters or more).
 1.0.4a:
 	- Fixed a bug where the skill title for Vampire Lord and Werewolf skills would show up as "undefined" due to relevant data not being received from the game.

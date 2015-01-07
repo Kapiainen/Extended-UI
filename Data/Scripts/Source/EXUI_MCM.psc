@@ -99,11 +99,11 @@ EndFunction
 
 Event OnVersionUpdate(int a_version)
 	If((a_version >= 1) && (CurrentVersion < 1))
-		Debug.Trace(GetTrace(a_version))
+		Debug.Trace(GetTrace(1))
 	EndIf
 
 	If((a_version >= 2) && (CurrentVersion < 2))
-		Debug.Trace(GetTrace(a_version))
+		Debug.Trace(GetTrace(2))
 		sStatsMenuAspectRatios = new String[4]
 		sStatsMenuAspectRatios[0] = "4:3"
 		sStatsMenuAspectRatios[1] = "5:4"

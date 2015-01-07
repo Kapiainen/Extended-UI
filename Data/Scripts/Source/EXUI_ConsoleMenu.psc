@@ -99,11 +99,11 @@ EndFunction
 
 Function OnVersionUpdate(Int aiVersion)
 	If((aiVersion >= 1) && (iScriptVersion < 1))
-		Debug.Trace(GetTrace(aiVersion))
+		Debug.Trace(GetTrace(1))
 	EndIf
 
 	If((aiVersion >= 2) && (iScriptVersion < 2))
-		Debug.Trace(GetTrace(aiVersion))
+		Debug.Trace(GetTrace(2))
 		If(PlayerRef == None)
 			PlayerRef = Game.GetPlayer()
 		EndIf

@@ -25,7 +25,7 @@ EndEvent
 Event OnStatsMenuOpen(String asEventName, String asStringArg, Float afNumArg, Form akSender)
 	iHighlightedSkill = kSkillDummy.GetWeight() as Int
 	UI.InvokeNumber("StatsMenu", "_root.StatsMenuBaseInstance.initializeHighlighting", iHighlightedSkill as Float)
-	UI.InvokeNumber("StatsMenu", "_root.StatsMenuBaseInstance.aspectRatio", MCM.iStatsMenuAspectRatio)
+	UI.InvokeNumber("StatsMenu", "_root.StatsMenuBaseInstance.setAspectRatio", MCM.iStatsMenuAspectRatio)
 EndEvent
 
 Event OnSkillHighlightChange(String asEventName, String asStringArg, Float afNumArg, Form akSender)
@@ -56,11 +56,11 @@ EndFunction
 
 Function OnVersionUpdate(Int aiVersion)
 	If((aiVersion >= 1) && (iScriptVersion < 1))
-		Debug.Trace(GetTrace(aiVersion))
+		Debug.Trace(GetTrace(1))
 	EndIf
 
 	If((aiVersion >= 2) && (iScriptVersion < 2))
-		Debug.Trace(GetTrace(aiVersion))
+		Debug.Trace(GetTrace(2))
 	EndIf
 
 	iScriptVersion = aiVersion

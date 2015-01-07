@@ -40,7 +40,7 @@ EndFunction
 
 Function OnVersionUpdate(Int aiVersion)
 	If((aiVersion >= 1) && (iScriptVersion < 1))
-		Debug.Trace(GetTrace(aiVersion))
+		Debug.Trace(GetTrace(1))
 	EndIf
 
 	iScriptVersion = aiVersion
