@@ -3,6 +3,10 @@ Scriptname EXUI_SleepWaitMenu extends ReferenceAlias
 EXUI_MCM Property MCM Auto
 
 Event OnInit()
+	RegisterForSingleUpdate(2.0)
+EndEvent
+
+Event OnUpdate()
 	OnVersionUpdate(GetVersion())
 	RegisterEvents()
 EndEvent

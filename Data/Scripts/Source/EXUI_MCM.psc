@@ -11,6 +11,8 @@ Event OnPageReset(string a_page)
 	AddHeaderOption("$EXUI_SLEEPWAITTITLE")
 	AddToggleOptionST("toggleMaximumSleepWait", "$EXUI_SLEEPWAITMODMAXVAL", bSleepWaitMaximum)
 	AddSliderOptionST("sliderMaximumSleepWait", "$EXUI_SLEEPWAITMAXVAL", fSleepWaitMaximum, "$EXUI_HOURSFORMAT")
+	AddHeaderOption("$EXUI_STATSMENUTITLE")
+	AddMenuOptionST("menuStatsMenuAspectRatio", "$EXUI_STATSMENUASPECTRATIO", sStatsMenuAspectRatios[iStatsMenuAspectRatio])
 	SetCursorPosition(1)
 	AddHeaderOption("$EXUI_CONSOLETITLE")
 	AddToggleOptionST("toggleConsoleFullscreen", "$EXUI_CONSOLEFULLSCREEN", bConsoleFullscreen)
@@ -59,16 +61,36 @@ State sliderMaximumSleepWait
 	EndEvent
 EndState
 
+State menuStatsMenuAspectRatio
+    Event OnMenuOpenST()
+        SetMenuDialogStartIndex(iStatsMenuAspectRatio)
+        SetMenuDialogDefaultIndex(2)
+        SetMenuDialogOptions(sStatsMenuAspectRatios)
+    EndEvent
+
+    Event OnMenuAcceptST(int index)
+        iStatsMenuAspectRatio = index
+        SetMenuOptionValueST(sStatsMenuAspectRatios[iStatsMenuAspectRatio])
+    EndEvent
+
+    Event OnDefaultST()
+        iStatsMenuAspectRatio = 2
+        SetMenuOptionValueST(sStatsMenuAspectRatios[iStatsMenuAspectRatio])
+    EndEvent
+EndState
+
 ;Private variables
+String[] sStatsMenuAspectRatios
 
 ;Public variables
 Bool Property bSleepWaitMaximum = True Auto Hidden
 Float Property fSleepWaitMaximum = 24.0 Auto Hidden
 Bool Property bConsoleFullscreen = False Auto Hidden
+Int Property iStatsMenuAspectRatio = 2 Auto Hidden
 
 ;Script versioning
 Int Function GetVersion()
-	Return 1
+	Return 2
 EndFunction
 
 String Function GetTrace(Int aiVersion)
@@ -78,5 +100,14 @@ EndFunction
 Event OnVersionUpdate(int a_version)
 	If((a_version >= 1) && (CurrentVersion < 1))
 		Debug.Trace(GetTrace(a_version))
+	EndIf
+
+	If((a_version >= 2) && (CurrentVersion < 2))
+		Debug.Trace(GetTrace(a_version))
+		sStatsMenuAspectRatios = new String[4]
+		sStatsMenuAspectRatios[0] = "4:3"
+		sStatsMenuAspectRatios[1] = "5:4"
+		sStatsMenuAspectRatios[2] = "16:9"
+		sStatsMenuAspectRatios[3] = "16:10"
 	EndIf
 EndEvent

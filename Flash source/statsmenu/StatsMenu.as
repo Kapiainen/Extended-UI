@@ -39,8 +39,8 @@ class StatsMenu extends MovieClip
 	static var STATS: Number = 0;
 	static var LEVEL_UP: Number = 1;
 
-	static var MaxPerkNameHeight: Number = 16; //115;
-	static var MaxPerkNameHeightLevelMode: Number = 38; //175;
+	static var MaxPerkNameHeight: Number = 16; //115 is the vanilla value
+	static var MaxPerkNameHeightLevelMode: Number = 38; //175 is the vanilla value
 	static var MaxPerkNamesDisplayed: Number = 64;
 
 	static var SkillsA: Array;
@@ -56,29 +56,26 @@ class StatsMenu extends MovieClip
 	var CameraUpdateInterval: Number = 0;
 
 	var AddPerkButtonInstance: MovieClip;
-	//var AddPerkTextInstance: MovieClip; // Amount of perks to distribute
-	//var BottomBarInstance: MovieClip; // Magicka, health, stamina
 	var CameraMovementInstance: MovieClip;
 	var CurrentPerkFrame: Number;
 	var DescriptionCardMeter: Meter;
-	var LevelMeter: Meter; // Level progress
+	var LevelMeter: Meter;
 	var PerkEndFrame: Number;
 	var PerkName0: MovieClip;
 	var PerksLeft: Number;
 	var Platform: Number;
 	var SkillsListInstance: MovieClip;
 	var State: Number; 
-	//var TopPlayerInfo: MovieClip; // Name, level, race
-
 
 	var DescriptionCardInstance: MovieClip; // Skill and perk descriptions
-	//var AnimatingSkillTextInstance: AnimatedSkillText;
 	
 	var SkillMarkers: Array;
 	
 	var backgroundBarUpper: MovieClip;
 	var backgroundBarLower: MovieClip;
 	var perkNotification: MovieClip;
+
+	var highlightingInitialized: Boolean = false;
 	
 	static var SKILLMARKER_ALPHA_REGULAR = 50;
 	static var SKILLMARKER_ALPHA_HIGHLIGHTED = 100;
@@ -90,7 +87,6 @@ class StatsMenu extends MovieClip
 		DescriptionCardMeter = new Meter(StatsMenu.StatsMenuInstance.DescriptionCardInstance.animate);
 		StatsMenu.SkillsA = new Array();
 		StatsMenu.SkillRing_mc = SkillsListInstance;
-		//SetDirection(0);
 		var playerInfoCard: MovieClip = backgroundBarUpper.BottomBarInstance.BottomBarPlayerInfoInstance.PlayerInfoCardInstance;
 		StatsMenu.MagickaMeterBase = playerInfoCard.MagickaMeterInstance;
 		StatsMenu.HealthMeterBase = playerInfoCard.HealthMeterInstance;
@@ -126,53 +122,10 @@ class StatsMenu extends MovieClip
 		perkNotification.AddPerkTextInstance.buttonPCSpaceInstance._alpha = 0;
 		perkNotification.AddPerkTextInstance.buttonX360YInstance._alpha = 0;
 		perkNotification.AddPerkTextInstance.buttonPS3YInstance._alpha = 0;
-		//skse.Log("===== StatsMenu =====");
-		
-		//setInterval(Delegate.create(StatsMenu.StatsMenuInstance, StatsMenu.StatsMenuInstance.FakePress), 500);
 	}
-	
-	/*
-	var gotoSkillId_: Number;
-	
-	public function gotoSkill(skill: Number): Void
-	{
-		// Left or right, which is the shortest route?
-		var Distance: Number = skill - ((highlightSkillIndex - 1) / 5);
-		if(Math.abs(Distance) > 9)
-			Distance = Distance * -1;
-		gotoSkillId_ = setInterval(this, "transitioningToAngle", 20, skill, Distance);
-	}
-	
-	function transitioningToAngle(skill: Number, transitionDirection: Number): Void
-	{
-		_global.skse.ApplyStatsMenuTransition(transitionDirection, 0);
-		//_global.skse.ApplyStatsMenuTransition(1000, 0);
-		if(highlightSkillIndex == ((skill * 5) + 1)) {
-			clearInterval(gotoSkillId_);
-			_global.skse.ApplyStatsMenuTransition(0, 1);
-		}
-	}
-	*/
-	
-	/*
-	function FakePress()
-	{
-		this.onEnterFrame = function()
-		{
-			_global.skse.ApplyStatsMenuTransition(150, 0);
-		};
-	}
-	*/
 
 	function GetSkillClip(aSkillName: String): TextField
 	{
-		/*
-		skse.Log("===== GetSkillClip =====");
-		for(var i = 0; i < arguments.length; i++) {
-			skse.Log("arguments[" + i + "] = " + arguments[i]);
-		}
-		*/
-		
 		return SkillsListInstance.BaseRingInstance[aSkillName].Val.ValText;
 	}
 
@@ -191,7 +144,6 @@ class StatsMenu extends MovieClip
 				} else if (GlobalFunc.Lerp(0, 720, 0, 1, StatsMenu.PerkNamesA[i + 2]) > (State == StatsMenu.LEVEL_UP ? StatsMenu.MaxPerkNameHeightLevelMode : StatsMenu.MaxPerkNameHeight)) {
 					this["PerkName" + perkIdx].PerkNameClipInstance.NameText.html = true;
 					this["PerkName" + perkIdx].PerkNameClipInstance.NameText.htmlText = "<font face=\'$EverywhereMediumFont\'>" + StatsMenu.PerkNamesA[i] + "</font>";
-					//this["PerkName" + perkIdx].PerkNameClipInstance.NameText.SetText(StatsMenu.PerkNamesA[i], true);
 					this["PerkName" + perkIdx]._xscale = StatsMenu.PerkNamesA[i + 2] * 165 + 10;
 					this["PerkName" + perkIdx]._yscale = StatsMenu.PerkNamesA[i + 2] * 165 + 10;
 					this["PerkName" + perkIdx]._x = GlobalFunc.Lerp(0, 1280, 0, 1, StatsMenu.PerkNamesA[i + 1]) - _x;
@@ -218,8 +170,6 @@ class StatsMenu extends MovieClip
 			return;
 		}
 
-
-
 		if (abShow == false) {
 			CurrentPerkFrame = 0;
 			for (var i: Number = 0; i < StatsMenu.MaxPerkNamesDisplayed; i++) {
@@ -239,24 +189,12 @@ class StatsMenu extends MovieClip
 		GameDelegate.addCallBack("SetPlayerInfo", this, "SetPlayerInfo");
 		GameDelegate.addCallBack("UpdateSkillList", this, "UpdateSkillList");
 		GameDelegate.addCallBack("SetDirection", this, "SetDirection");
-		GameDelegate.addCallBack("HideRing", this, "HideRing");
 		GameDelegate.addCallBack("SetStatsMode", this, "SetStatsMode");
 		GameDelegate.addCallBack("SetPerkCount", this, "SetPerkCount");
 	}
 
 	function SetStatsMode(): Void
 	{
-		/*
-			arguments[0] = ? : Boolean
-			arguments[1] = Perk points : Number
-		*/
-		/*
-			skse.Log("===== SetStatsMode =====");
-			for(var i = 0; i < arguments.length; i++) {
-				skse.Log("arguments[" + i + "] = " + arguments[i]);
-			}
-		*/
-		
 		State = arguments[0] ? StatsMenu.STATS : StatsMenu.LEVEL_UP;
 		PerksLeft = arguments[1];
 		if (arguments[1] != undefined) {
@@ -277,7 +215,6 @@ class StatsMenu extends MovieClip
 		*/
 		
 		// Show number of unassigned perk points
-		//skse.Log("Highlighted skill level = " + SkillStatsA[(highlightSkillIndex - 1)]);
 		perkNotification.AddPerkTextInstance.buttonPCSpaceInstance._alpha = 0;
 		perkNotification.AddPerkTextInstance.buttonX360YInstance._alpha = 0;
 		perkNotification.AddPerkTextInstance.buttonPS3YInstance._alpha = 0;
@@ -286,7 +223,6 @@ class StatsMenu extends MovieClip
 		if(bPerkMode == false) {
 			if (SkillStatsA[(highlightSkillIndex - 1)] != undefined) {
 				if (SkillStatsA[(highlightSkillIndex - 1)] >= 100) {
-					//skse.Log("Skill is eligible for Legendary treatment");
 					ShowLegendarySkill(true, arguments[0]);
 					return;
 				} else {				
@@ -303,10 +239,6 @@ class StatsMenu extends MovieClip
 		
 		if (arguments[0] > 0) {
 			perkNotification.AddPerkTextInstance._alpha = 100;
-			//"<font face=\'$EverywhereMediumFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>"
-			//perkNotification.AddPerkTextInstance.AddPerkTextField.html = true;
-			//perkNotification.AddPerkTextInstance.AddPerkTextField.htmlText = "<font face=\'$EverywhereMediumFont\' size=\'20\' color=\'#FFFFFF\'>" + _root.PerksInstance.text + " " + arguments[0] + "</font>";
-			//perkNotification.AddPerkTextInstance.AddPerkTextField.text = _root.PerksInstance.text + " " + arguments[0];
 			SetPerkNotification(_root.PerksInstance.text + " " + arguments[0]);
 			return;
 		}
@@ -322,23 +254,6 @@ class StatsMenu extends MovieClip
 	function ShowLegendarySkill(abShow: Boolean, aiPerkCount: Number): Void
 	{
 		if(abShow == true) {
-			/*
-			var xSpacer: Number = -10.0;
-			var xPos: Number = perkNotification.AddPerkTextInstance.AddPerkTextField._x + ((perkNotification.AddPerkTextInstance.AddPerkTextField._width - perkNotification.AddPerkTextInstance.AddPerkTextField.textWidth) / 2.0) + xSpacer;
-			if (StatsMenu.StatsMenuInstance.Platform == 0) {
-				perkNotification.AddPerkTextInstance.buttonPCSpaceInstance._x = xPos;
-				perkNotification.AddPerkTextInstance.AddPerkTextField._x = perkNotification.AddPerkTextInstance.AddPerkTextField._x + (perkNotification.AddPerkTextInstance.buttonPCSpaceInstance._width / 2.0);
-				perkNotification.AddPerkTextInstance.buttonPCSpaceInstance._alpha = 100;
-			} else if (StatsMenu.StatsMenuInstance.Platform == 3) {
-				perkNotification.AddPerkTextInstance.buttonPS3YInstance._x = xPos;
-				
-				perkNotification.AddPerkTextInstance.buttonPS3YInstance._alpha = 100;
-			} else {
-				perkNotification.AddPerkTextInstance.buttonX360YInstance._x = xPos;
-				perkNotification.AddPerkTextInstance.buttonX360YInstance._alpha = 100;
-			}
-			*/
-			
 			SetPerkNotification("$Legendary");
 			
 			if (StatsMenu.StatsMenuInstance.Platform == 0) {
@@ -437,66 +352,23 @@ class StatsMenu extends MovieClip
 			[2] = 0 (Progress to next level of this skill)
 			[3] = #FFFFFF (Color)
 			[4] = 0 (Number of times a skill has been made legendary)
-		*/
-		//StatsMenu.StatsMenuInstance.AnimatingSkillTextInstance.InitAnimatedSkillText(StatsMenu.SkillStatsA);				
+		*/			
 		if(SkillMarkers.length <= 0) {
-			var markerSpacer: Number = 125;
-			//var markerScale: Number = 150.0 / SkillMarker0._width;
+			//var markerSpacer: Number = 125;
 			var markerScale: Number = (150.0 / 216.45) * 100;
-			
-			//skse.Log("Generating markers");
+
 			for(var i: Number = 0; i < 18; i++) {
-				var skillMarkerNew = backgroundBarLower[("SkillMarker" + i)];//backgroundBarLower.attachMovie("SkillText_mc", "SkillText" + i, getNextHighestDepth());
-				/*
-				var skillLevel: Number = (i * 5);
-				var skillName: Number = skillLevel + 1;
-				var skillProgress: Number = skillLevel + 2;
-				var skillColor: Number = skillLevel + 3;
-				*/
-				
-				//skillMarkerNew.LabelInstance.html = true;
-				
-				//skillMarkerNew.LabelInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + (StatsMenu.SkillStatsA[skillName].toString().toUpperCase())  + "</font>" + " <font color=\'" + StatsMenu.SkillStatsA[skillColor] + "\'>" + StatsMenu.SkillStatsA[skillLevel].toString().toUpperCase() + "</font>";
+				var skillMarkerNew = backgroundBarLower[("SkillMarker" + i)];
 				skillMarkerNew._alpha = StatsMenu.SKILLMARKER_ALPHA_REGULAR;
 				skillMarkerNew._xscale = markerScale;
 				skillMarkerNew._yscale = markerScale;
 
-				//var ShortBar: Meter = new Meter(skillMarkerNew.ShortBar);
-				//ShortBar.SetPercent(StatsMenu.SkillStatsA[skillProgress]);
 				SkillMarkers.push(skillMarkerNew);
-				//skse.Log("SkillMarker" + i + ", x = " + SkillMarkers[i]._x + ", y = " + SkillMarkers[i]._y);
 			}
-			
-			//3x6
-			//Bottom row
-			//SkillMarkers[13]._x = 190 + 190 - 8 + 22 + SkillMarkers[0]._width / 4.0 * 3.0;
-			SkillMarkers[13]._x = 190 + 190 + 19 + SkillMarkers[0]._width / 4.0 * 3.0;
-			SkillMarkers[13]._y = 82;
-			for(var i: Number = 14; i < 18; i++) {
-				SkillMarkers[i]._x = SkillMarkers[i - 1]._x + SkillMarkers[0]._width / 4.0 * 3.0;
-				SkillMarkers[i]._y = SkillMarkers[13]._y;
-			}
-			SkillMarkers[0]._x = SkillMarkers[17]._x + SkillMarkers[0]._width / 4.0 * 3.0;
-			SkillMarkers[0]._y = SkillMarkers[13]._y;
-			
-			//Middle row
-			SkillMarkers[7]._x = SkillMarkers[13]._x;
-			SkillMarkers[7]._y = SkillMarkers[13]._y - 45;
-			for(var i: Number = 8; i < 13; i++) {
-				SkillMarkers[i]._x = SkillMarkers[i - 1]._x + SkillMarkers[0]._width / 4.0 * 3.0;
-				SkillMarkers[i]._y = SkillMarkers[7]._y;
-			}
-			
-			//Top row
-			SkillMarkers[1]._x = SkillMarkers[13]._x;
-			SkillMarkers[1]._y = SkillMarkers[7]._y - 45;
-			for(var i: Number = 2; i < 7; i++) {
-				SkillMarkers[i]._x = SkillMarkers[i - 1]._x + SkillMarkers[0]._width / 4.0 * 3.0;
-				SkillMarkers[i]._y = SkillMarkers[1]._y;
-			}
+
+			setAspectRatio(0);
 			
 			if(highlightingInitialized == false) {
-				//highlightingInitialized = true;
 				skse.SendModEvent("EXUI_OnStatsMenuOpen");
 			}
 		}
@@ -510,7 +382,6 @@ class StatsMenu extends MovieClip
 			SkillMarkers[i].LabelInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + (StatsMenu.SkillStatsA[skillName].toString().toUpperCase())  + "</font>" + " <font color=\'" + StatsMenu.SkillStatsA[skillColor] + "\'>" + StatsMenu.SkillStatsA[skillLevel].toString().toUpperCase() + "</font>";
 			var ShortBar: Meter = new Meter(SkillMarkers[i].ShortBar);
 			ShortBar.SetPercent(StatsMenu.SkillStatsA[skillProgress]);
-			//SkillMarkers[i].ShortBar.SetPercent(StatsMenu.SkillStatsA[skillProgress]);
 		}
 	}
 	
@@ -523,14 +394,76 @@ class StatsMenu extends MovieClip
 		updateHighlightedSkill();
 		highlightingInitialized = true;
 	}
-	
-	var highlightingInitialized: Boolean = false;
 
-	function HideRing(): Void
+	public function setAspectRatio(aIndex: Number): Void
 	{
-		//skse.Log("===== HideRing =====");
-		//StatsMenu.StatsMenuInstance.AnimatingSkillTextInstance.HideRing();
+		var xOrigin: Number = Math.abs(backgroundBarLower.background._x) + 11; // = backgroundBarLower.background._x
+		var yOrigin: Number = 0; // 82
+		var yOffset: Number = 0; // 45
+		var xMultiplier: Number = 1.0; // 0.75
+		var slotWidth: Number = 150.0;
+		var markerWidth: Number = SkillMarkers[0]._width * SkillMarkers[0]._xscale;
+		if(aIndex == 0) // 4:3
+		{
+			xOrigin += 160;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 0.75;
+			slotWidth = ((720 / 3.0) * 4.0) / 6.0;
+		}
+		else if(aIndex == 1) // 5:4
+		{
+			xOrigin += 190;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 0.75;
+			slotWidth = ((720 / 4.0) * 5.0) / 6.0;
+		}
+		else if(aIndex == 2) // 16:9
+		{
+			xOrigin += 0;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 1.0;
+			slotWidth = ((720 / 9.0) * 16.0) / 6.0;
+		}
+		else if(aIndex == 3) // 16:10
+		{
+			xOrigin += 64;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 1.0;
+			slotWidth = ((720 / 10.0) * 16.0) / 6.0;
+		}
+		var markerSpacer: Number = (slotWidth - markerWidth) / 2.0;
+
+		//Bottom row = Mage
+		SkillMarkers[13]._x = xOrigin + slotWidth / 2.0;
+		SkillMarkers[13]._y = yOrigin;
+		for(var i: Number = 14; i < 18; i++) {
+			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
+			SkillMarkers[i]._y = SkillMarkers[13]._y;
+		}
+		SkillMarkers[0]._x = SkillMarkers[17]._x + slotWidth;
+		SkillMarkers[0]._y = SkillMarkers[13]._y;
+		
+		//Middle row = Thief
+		SkillMarkers[7]._x = SkillMarkers[13]._x;
+		SkillMarkers[7]._y = SkillMarkers[13]._y - yOffset;
+		for(var i: Number = 8; i < 13; i++) {
+			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
+			SkillMarkers[i]._y = SkillMarkers[7]._y;
+		}
+		
+		//Top row = Warrior
+		SkillMarkers[1]._x = SkillMarkers[13]._x;
+		SkillMarkers[1]._y = SkillMarkers[7]._y - yOffset;
+		for(var i: Number = 2; i < 7; i++) {
+			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
+			SkillMarkers[i]._y = SkillMarkers[1]._y;
+		}
 	}
+	
 	
 
 	function SetDirection(): Void //aAngle: Number): Void
@@ -544,12 +477,7 @@ class StatsMenu extends MovieClip
 			skse.Log("arguments[" + i + "] = " + arguments[i]);
 		}
 		*/
-		
-		
-		//StatsMenu.StatsMenuInstance.AnimatingSkillTextInstance.SetAngle(arguments[0]);
-		//highlightSkill(arguments[0]);
 		currentAngle = arguments[0];
-		//skse.Log("Updating angle to " + currentAngle);
 	}
 	
 	var currentAngle: Number = 300;
@@ -587,17 +515,14 @@ class StatsMenu extends MovieClip
 		
 		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.html = true;
 		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[0] + "</font>";
-		//StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.SetText(arguments[0]);
 		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.html = true;
 		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[1] + "</font>";
-		//StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.SetText(arguments[1]);
 		if (LevelMeter == undefined) {
 			LevelMeter = new Meter(StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.animate);
 		}
 		LevelMeter.SetPercent(arguments[2]);
 		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.html = true;
 		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[3] + "</font>";
-		//StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.SetText(arguments[3]);
 		SetMeter(0, arguments[4], arguments[5], arguments[6]);
 		SetMeter(1, arguments[7], arguments[8], arguments[9]);
 		SetMeter(2, arguments[10], arguments[11], arguments[12]);
@@ -659,10 +584,8 @@ class StatsMenu extends MovieClip
 			StatsMenu.MeterText[arguments[0]].html = true;
 			if (arguments[3] == undefined) {
 				StatsMenu.MeterText[arguments[0]].SetText("<font face=\'$EverywhereMediumFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>", true);
-				//StatsMenu.MeterText[arguments[0]].SetText("<font face=\'$EverywhereBoldFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>", true);
 			} else {
 				StatsMenu.MeterText[arguments[0]].SetText("<font face=\'$EverywhereMediumFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>", true);
-				//StatsMenu.MeterText[arguments[0]].SetText("<font face=\'$EverywhereBoldFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>", true);
 			}
 			StatsMenu.MagickaMeter.Update();
 			StatsMenu.HealthMeter.Update();
@@ -689,11 +612,6 @@ class StatsMenu extends MovieClip
 			}
 			SkillMarkers[((highlightSkillIndex - 1) / 5)]._alpha = StatsMenu.SKILLMARKER_ALPHA_HIGHLIGHTED;
 			skse.SendModEvent("EXUI_OnSkillHighlightChange", null, ((highlightSkillIndex - 1) / 5));
-			
-			//StatsMenu.StatsMenuInstance.AnimatingSkillTextInstance.highlightSkill(highlightSkillIndex);
-			
-			//StatsMenu.StatsMenuInstance.TopPlayerInfo.FirstLastLabel.SetText(StatsMenu.SkillStatsA[highlightSkillIndex]);
-			//skse.Log("New highlight angle is " + highlightSkillAngle);
 		}
 	}	
 	
@@ -741,18 +659,15 @@ class StatsMenu extends MovieClip
 				skse.Log("arguments[" + i + "] = " + arguments[i]);
 			}
 		*/
-		//skse.Log("Current angle is " + currentAngle);
 		
 		if(previousDescription != arguments[3]) {
 			previousDescription = arguments[3];
 			if(arguments[0]) {
 				// Perk
 				var skillName: String = arguments[6].substr(0, arguments[6].indexOf(" <", 0));
-				//skse.Log("Skill name = " + skillName);
 				for(var i = 1; i < StatsMenu.SkillStatsA.length; i += 5) {
 					if(StatsMenu.SkillStatsA[i] == skillName) {
 						highlightSkillIndex = i;
-						//skse.Log("Index = " + highlightSkillIndex);
 						updateHighlightedSkill();
 						break;
 					}
@@ -761,39 +676,24 @@ class StatsMenu extends MovieClip
 			
 			if(bPerkMode != arguments[0]) {
 				bPerkMode = arguments[0];
-				if(bPerkMode) {
-					//skse.Log("Switching to 'Perks' frame");
-				} else {
-					//skse.Log("Switching to 'Skills' frame");
+				if(!bPerkMode) {
 					updateHighlightedSkill();
 				}
 				if (StatsMenu.StatsMenuInstance != undefined) {
-					//updatePlayerInfo();
 					StatsMenu.StatsMenuInstance.gotoAndPlay(arguments[0] ? "Perks" : "Skills");
 				}
 			} else {
 				 if(!arguments[0]) {
 					// Skill
-					//skse.Log("Previous highlight angle is " + highlightSkillAngle);
 					if(highlightingInitialized == true) {
 						updateHighlightedIndex();
 						updateHighlightedSkill();
 					}
 				}
 			}
-			/*
-			for(var i = 0; i < arguments.length; i++) {
-				skse.Log("arguments[" + i + "] = " + arguments[i]);
-			}
-			*/
+
 			var descriptionCard: MovieClip = StatsMenu.StatsMenuInstance.DescriptionCardInstance;
-			
-			//descriptionCard.CardDescriptionTextInstance.html = true;
-			//descriptionCard.CardDescriptionTextInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[3] + "</font>";
-			//descriptionCard.CardDescriptionTextInstance.SetText(arguments[3]);
-			
-			//descriptionCard.CardDescriptionTextInstance._height = descriptionCard.CardDescriptionTextInstance.textHeight + 4.0;
-			
+
 			// Skill mode
 			if (!arguments[0]) {
 				if (SkillStatsA[highlightSkillIndex] == undefined) {

@@ -2,9 +2,14 @@ Scriptname EXUI_StatsMenu extends ReferenceAlias
 
 MiscObject Property kSkillDummy Auto
 Int iHighlightedSkill = -1
+EXUI_MCM Property MCM Auto
 
 ;Events
 Event OnInit()
+	RegisterForSingleUpdate(2.0)
+EndEvent
+
+Event OnUpdate()
 	OnVersionUpdate(GetVersion())
 	RegisterEvents()
 EndEvent
@@ -20,6 +25,7 @@ EndEvent
 Event OnStatsMenuOpen(String asEventName, String asStringArg, Float afNumArg, Form akSender)
 	iHighlightedSkill = kSkillDummy.GetWeight() as Int
 	UI.InvokeNumber("StatsMenu", "_root.StatsMenuBaseInstance.initializeHighlighting", iHighlightedSkill as Float)
+	UI.InvokeNumber("StatsMenu", "_root.StatsMenuBaseInstance.aspectRatio", MCM.iStatsMenuAspectRatio)
 EndEvent
 
 Event OnSkillHighlightChange(String asEventName, String asStringArg, Float afNumArg, Form akSender)
@@ -41,7 +47,7 @@ EndFunction
 Int iScriptVersion = 0
 
 Int Function GetVersion()
-	Return 1
+	Return 2
 EndFunction
 
 String Function GetTrace(Int aiVersion)
@@ -50,6 +56,10 @@ EndFunction
 
 Function OnVersionUpdate(Int aiVersion)
 	If((aiVersion >= 1) && (iScriptVersion < 1))
+		Debug.Trace(GetTrace(aiVersion))
+	EndIf
+
+	If((aiVersion >= 2) && (iScriptVersion < 2))
 		Debug.Trace(GetTrace(aiVersion))
 	EndIf
 

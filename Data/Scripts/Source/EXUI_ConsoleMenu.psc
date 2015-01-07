@@ -5,7 +5,11 @@ EXUI_MCM Property MCM Auto
 
 ;Events
 Event OnInit()
-	PlayerRef = Self.GetActorReference()
+	RegisterForSingleUpdate(2.0)
+EndEvent
+
+Event OnUpdate()
+	PlayerRef = Game.GetPlayer()
 	OnVersionUpdate(GetVersion())
 	RegisterEvents()
 EndEvent
@@ -32,15 +36,17 @@ Event OnMenuOpen(string menuName)
 	EndIf
 
 	;Current cell
-	Cell kCell = PlayerRef.GetParentCell()
-	If(kCell != None)
-		String sCellName = kCell.GetName()
-		Int iCellFormID = kCell.GetFormID()
-		Int iHandle = UICallback.Create("Console", "_root.ConsoleMenu_mc.ConsoleInstance_mc.setCurrentCell")
-		If(iHandle)
-			UICallback.PushString(iHandle, sCellName)
-			UICallback.PushInt(iHandle, iCellFormID)
-			UICallback.Send(iHandle)
+	If(PlayerRef != None)
+		Cell kCell = PlayerRef.GetParentCell()
+		If(kCell != None)
+			String sCellName = kCell.GetName()
+			Int iCellFormID = kCell.GetFormID()
+			Int iHandle = UICallback.Create("Console", "_root.ConsoleMenu_mc.ConsoleInstance_mc.setCurrentCell")
+			If(iHandle)
+				UICallback.PushString(iHandle, sCellName)
+				UICallback.PushInt(iHandle, iCellFormID)
+				UICallback.Send(iHandle)
+			EndIf
 		EndIf
 	EndIf
 EndEvent
@@ -84,7 +90,7 @@ EndEvent
 Int iScriptVersion = 0
 
 Int Function GetVersion()
-	Return 1
+	Return 2
 EndFunction
 
 String Function GetTrace(Int aiVersion)
@@ -94,6 +100,13 @@ EndFunction
 Function OnVersionUpdate(Int aiVersion)
 	If((aiVersion >= 1) && (iScriptVersion < 1))
 		Debug.Trace(GetTrace(aiVersion))
+	EndIf
+
+	If((aiVersion >= 2) && (iScriptVersion < 2))
+		Debug.Trace(GetTrace(aiVersion))
+		If(PlayerRef == None)
+			PlayerRef = Game.GetPlayer()
+		EndIf
 	EndIf
 
 	iScriptVersion = aiVersion
