@@ -1,6 +1,6 @@
 Extended UI by [MrJack](http://forums.bethsoft.com/user/781645-mrjack/)
 =============
-Latest version: 1.0.4a
+Latest version: 1.1.0
 
 Requirements:
 - Skyrim (1.9.32.0.8)
