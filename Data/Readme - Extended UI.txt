@@ -1,5 +1,5 @@
 Extended UI
-Version: 1.1.0a
+Version: 1.1.0b
 Author: MrJack
 
 Table of contents
@@ -79,12 +79,15 @@ SKSE team for all their hard work, which has made this mod possible.
 Translations:
 Polish - markosboss
 Russian - kopasov
+French - Sita
 
 --How to contact the author--
 PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 
 --Changelog--
+1.1.0b:
+	- Added French translation
 1.1.0a:
 	- Updated Russian translation
 1.1.0:
