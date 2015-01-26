@@ -1,5 +1,5 @@
 Extended UI
-Version: 1.1.0b
+Version: 1.1.0c
 Author: MrJack
 
 Table of contents
@@ -80,23 +80,31 @@ Translations:
 Polish - markosboss
 Russian - kopasov
 French - Sita
+German - 9Strike
 
 --How to contact the author--
 PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 
 --Changelog--
+1.1.0c:
+	- Added German translation
+
 1.1.0b:
 	- Added French translation
+
 1.1.0a:
 	- Updated Russian translation
+
 1.1.0:
 	- Added option in MCM to set the aspect ratio of the stats menu. Currently only used to adjust the placement of skill markers at the bottom of the screen. Default is 16:9.
 	- Hopefully fixed a bug that could cause a variable to not be assigned a value and thus cause error messages in the Papyrus log.
 	- Fixed a bug that caused a perk's required skill level to not be shown, if the skill's name was too long (around 14 characters or more).
+
 1.0.4a:
 	- Fixed a bug where the skill title for Vampire Lord and Werewolf skills would show up as "undefined" due to relevant data not being received from the game.
 	- Fixed a bug where Vampire Lord and Werewolf skills would wrongly indicate that they were eligible for becoming Legendary.
+
 1.0.4:
 	- Added a Russian translation of MCM.
 	- Added "exui_help" command to display information about other "exui_" commands.
@@ -105,17 +113,22 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 	- Fixed issue where making a skill Legendary didn't update the affected skill's marker without needing to reopen the skills menu.
 	- Added icon and counter for the Legendary status of a skill.
 	- Added indicator for when a skill can be made Legendary.
+
 1.0.3:
 	- Moved the skill markers a bit to the left as it was a bit lopsided.
 	- Skill/perk descriptions now support HTML tags again.
 	- The numbers indicating skill levels now change color when a skill is modified by a (de)buff.
 	- Added a Polish translation of MCM.
+
 1.0.2a:
 	- Updated translation files.
+
 1.0.2:
 	- Changed the fonts in the skills menu and rearranged the skill markers in the bottom bar.
 	- Added toggle for fullscreen console in MCM to always open the console in fullscreen mode.
 1.0.1:
+
 	- Standardized font in the upper bar in the Skills menu.
+	
 1.0.0:
 	- Initial release
