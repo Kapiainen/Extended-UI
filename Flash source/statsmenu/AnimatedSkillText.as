@@ -16,7 +16,9 @@ class AnimatedSkillText extends MovieClip
 
 	function InitAnimatedSkillText(aSkillTextA: Array): Void
 	{
+		/*
 		skse.Log("===== InitAnimatedSkillText =====");
+		*/
 		GlobalFunc.MaintainTextFormat();
 		var originY: Number = this._y;
 		var originX: Number = this._x;

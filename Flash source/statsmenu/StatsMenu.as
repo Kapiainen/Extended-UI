@@ -77,6 +77,8 @@ class StatsMenu extends MovieClip
 
 	var highlightingInitialized: Boolean = false;
 	
+	var bHideLegendaryPrompts: Boolean = false;
+	
 	static var SKILLMARKER_ALPHA_REGULAR = 50;
 	static var SKILLMARKER_ALPHA_HIGHLIGHTED = 100;
 
@@ -222,7 +224,7 @@ class StatsMenu extends MovieClip
 			
 		if(bPerkMode == false) {
 			if (SkillStatsA[(highlightSkillIndex - 1)] != undefined) {
-				if (SkillStatsA[(highlightSkillIndex - 1)] >= 100) {
+				if ((SkillStatsA[(highlightSkillIndex - 1)] >= 100) && (!bHideLegendaryPrompts)) {
 					ShowLegendarySkill(true, arguments[0]);
 					return;
 				} else {				
@@ -744,7 +746,8 @@ class StatsMenu extends MovieClip
 		var skillLegendaryCount: Number = highlightSkillIndex + 3;
 		var descriptionCard: MovieClip = StatsMenu.StatsMenuInstance.DescriptionCardInstance;
 		if (SkillStatsA[skillLegendaryCount] != undefined) {
-			if (SkillStatsA[skillLegendaryCount] > 0) {
+			if ((SkillStatsA[skillLegendaryCount] > 0) && (!bHideLegendaryPrompts))
+			{
 				descriptionCard.legendaryCounter.counterTextField.html = true;
 				descriptionCard.legendaryCounter.counterTextField.htmlText = SkillStatsA[skillLegendaryCount];
 				descriptionCard.legendaryCounter._x = -8.5;
@@ -756,5 +759,10 @@ class StatsMenu extends MovieClip
 		} else {
 			descriptionCard.legendaryCounter._alpha = 0;
 		}
+	}
+	
+	public function hideLegendaryPrompts(abFlag: Boolean): Void
+	{
+		bHideLegendaryPrompts = abFlag;
 	}
 }

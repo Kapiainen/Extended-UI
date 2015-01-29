@@ -13,6 +13,7 @@ Event OnPageReset(string a_page)
 	AddSliderOptionST("sliderMaximumSleepWait", "$EXUI_SLEEPWAITMAXVAL", fSleepWaitMaximum, "$EXUI_HOURSFORMAT")
 	AddHeaderOption("$EXUI_STATSMENUTITLE")
 	AddMenuOptionST("menuStatsMenuAspectRatio", "$EXUI_STATSMENUASPECTRATIO", sStatsMenuAspectRatios[iStatsMenuAspectRatio])
+	AddToggleOptionST("hideLegendaryPrompts", "$EXUI_HIDELEGENDARYPROMPTS", bHideLegendaryPrompts)
 	SetCursorPosition(1)
 	AddHeaderOption("$EXUI_CONSOLETITLE")
 	AddToggleOptionST("toggleConsoleFullscreen", "$EXUI_CONSOLEFULLSCREEN", bConsoleFullscreen)
@@ -26,7 +27,7 @@ State toggleConsoleFullscreen
 
 	Event OnDefaultST()
 		bConsoleFullscreen = False
-		SetToggleOptionValueST(bConsoleFullscreen)	
+		SetToggleOptionValueST(bConsoleFullscreen)
 	EndEvent
 EndState
 
@@ -38,7 +39,7 @@ State toggleMaximumSleepWait
 
 	Event OnDefaultST()
 		bSleepWaitMaximum = True
-		SetToggleOptionValueST(bSleepWaitMaximum)	
+		SetToggleOptionValueST(bSleepWaitMaximum)
 	EndEvent
 EndState
 
@@ -79,6 +80,18 @@ State menuStatsMenuAspectRatio
     EndEvent
 EndState
 
+State hideLegendaryPrompts
+	Event OnSelectST()
+		bHideLegendaryPrompts = !bHideLegendaryPrompts
+		SetToggleOptionValueST(bHideLegendaryPrompts)
+	EndEvent
+
+	Event OnDefaultST()
+		bHideLegendaryPrompts = False
+		SetToggleOptionValueST(bHideLegendaryPrompts)
+	EndEvent
+EndState
+
 ;Private variables
 String[] sStatsMenuAspectRatios
 
@@ -87,10 +100,11 @@ Bool Property bSleepWaitMaximum = True Auto Hidden
 Float Property fSleepWaitMaximum = 24.0 Auto Hidden
 Bool Property bConsoleFullscreen = False Auto Hidden
 Int Property iStatsMenuAspectRatio = 2 Auto Hidden
+Bool Property bHideLegendaryPrompts = False Auto Hidden
 
 ;Script versioning
 Int Function GetVersion()
-	Return 2
+	Return 3
 EndFunction
 
 String Function GetTrace(Int aiVersion)
@@ -109,5 +123,9 @@ Event OnVersionUpdate(int a_version)
 		sStatsMenuAspectRatios[1] = "5:4"
 		sStatsMenuAspectRatios[2] = "16:9"
 		sStatsMenuAspectRatios[3] = "16:10"
+	EndIf
+
+	If((a_version >= 3) && (CurrentVersion < 3))
+		Debug.Trace(GetTrace(3))
 	EndIf
 EndEvent
