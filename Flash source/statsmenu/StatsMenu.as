@@ -78,10 +78,33 @@ class StatsMenu extends MovieClip
 	var highlightingInitialized: Boolean = false;
 	
 	var bHideLegendaryPrompts: Boolean = false;
+	var bShowSkillModifiers: Boolean = false;
+	var AttributesA: Array;
+	var SkillBasesA: Array;
 	
+	// Player info
+	var playerName: String = "";
+	var playerRace: String = "";
+	var playerLevel: Number = 1;
+	var playerLevelProgress: Number = 0;
+	var bPlayerInfoUpdateRequested: Boolean = false;
+	
+	// Skill/perk descriptions
+	var previousDescription: String = "Init";
+	
+	// Skill meters
 	static var SKILLMARKER_ALPHA_REGULAR = 50;
 	static var SKILLMARKER_ALPHA_HIGHLIGHTED = 100;
-
+	private var bPerkMode: Boolean = false;
+	var highlightSkillIndex: Number = 76;
+	var highlightSkillAngle: Number = 300;
+	
+	// Misc
+	var currentAngle: Number = 300;
+	
+	// ==== Private functions ====
+	// Initialization
+	
 	function StatsMenu()
 	{
 		super();
@@ -121,19 +144,83 @@ class StatsMenu extends MovieClip
 		StatsMenu.StatsMenuInstance.gotoAndPlay("Skills");
 		bPerkMode = false;
 		SkillMarkers = new Array();
+		SkillBasesA = new Array();
 		perkNotification.AddPerkTextInstance.buttonPCSpaceInstance._alpha = 0;
 		perkNotification.AddPerkTextInstance.buttonX360YInstance._alpha = 0;
 		perkNotification.AddPerkTextInstance.buttonPS3YInstance._alpha = 0;
 	}
+	
+	function InitExtensions(): Void
+	{
+		GlobalFunc.SetLockFunction();
+		GlobalFunc.MaintainTextFormat();
+		GameDelegate.addCallBack("SetDescriptionCard", this, "SetDescriptionCard");
+		GameDelegate.addCallBack("SetPlayerInfo", this, "SetPlayerInfo");
+		GameDelegate.addCallBack("UpdateSkillList", this, "UpdateSkillList");
+		GameDelegate.addCallBack("SetDirection", this, "SetDirection");
+		GameDelegate.addCallBack("SetStatsMode", this, "SetStatsMode");
+		GameDelegate.addCallBack("SetPerkCount", this, "SetPerkCount");
+	}
+	
+	static function SetPlatform(): Void
+	{
+		/*
+			arguments[0] = ? : Number
+			arguments[1] = ? : Boolean
+		*/		
+		StatsMenu.StatsMenuInstance.AddPerkButtonInstance.SetPlatform(arguments[0], arguments[1]);
+		StatsMenu.StatsMenuInstance.Platform = arguments[0];
+	}
+	
+	// Misc
 
 	function GetSkillClip(aSkillName: String): TextField
 	{
 		return SkillsListInstance.BaseRingInstance[aSkillName].Val.ValText;
 	}
 
+	function SetStatsMode(): Void
+	{
+		State = arguments[0] ? StatsMenu.STATS : StatsMenu.LEVEL_UP;
+		PerksLeft = arguments[1];
+		if (arguments[1] != undefined) {
+			SetPerkCount(arguments[1]);
+		}
+	}
+	
+	function UpdateCamera(): Void
+	{
+		if (StatsMenu.StatsMenuInstance.CameraMovementInstance._currentFrame < 100) {
+			var nextFrame: Number = StatsMenu.StatsMenuInstance.CameraMovementInstance._currentFrame + 8;
+			if (nextFrame > 100) {
+				nextFrame = 100;
+			}
+			GameDelegate.call("MoveCamera", [CameraMovementInstance.CameraPositionAlpha._alpha / 100]);
+			return;
+		}
+		clearInterval(CameraUpdateInterval);
+		CameraUpdateInterval = 0;
+	}
+
+	static function StartCameraAnimation(): Void
+	{		
+		clearInterval(StatsMenu.StatsMenuInstance.CameraUpdateInterval);
+		GameDelegate.call("MoveCamera", [0]);
+		StatsMenu.StatsMenuInstance.CameraUpdateInterval = setInterval(Delegate.create(StatsMenu.StatsMenuInstance, StatsMenu.StatsMenuInstance.UpdateCamera), 41);
+	}
+	
+	function SetDirection(): Void //aAngle: Number): Void
+	{
+		/*
+			arguments[0] = Angle: Number
+		*/
+		currentAngle = arguments[0];
+	}
+	
+	// Perk and legendary skills
+	
 	function UpdatePerkText(abShow: Boolean): Void
 	{
-		//skse.Log("===== UpdatePerkText =====");
 		if (abShow == true || abShow == undefined) {
 			var perkIdx: Number = 0;
 			var perkAdded: Boolean = false;
@@ -157,7 +244,6 @@ class StatsMenu extends MovieClip
 					perkIdx++;
 					perkAdded = true;
 				}
-
 			}
 
 			for (var j: Number = perkIdx; j <= StatsMenu.MaxPerkNamesDisplayed; j++) {
@@ -182,40 +268,11 @@ class StatsMenu extends MovieClip
 		}
 	}
 
-	function InitExtensions(): Void
-	{
-		//skse.Log("===== InitExtensions =====");
-		GlobalFunc.SetLockFunction();
-		GlobalFunc.MaintainTextFormat();
-		GameDelegate.addCallBack("SetDescriptionCard", this, "SetDescriptionCard");
-		GameDelegate.addCallBack("SetPlayerInfo", this, "SetPlayerInfo");
-		GameDelegate.addCallBack("UpdateSkillList", this, "UpdateSkillList");
-		GameDelegate.addCallBack("SetDirection", this, "SetDirection");
-		GameDelegate.addCallBack("SetStatsMode", this, "SetStatsMode");
-		GameDelegate.addCallBack("SetPerkCount", this, "SetPerkCount");
-	}
-
-	function SetStatsMode(): Void
-	{
-		State = arguments[0] ? StatsMenu.STATS : StatsMenu.LEVEL_UP;
-		PerksLeft = arguments[1];
-		if (arguments[1] != undefined) {
-			SetPerkCount(arguments[1]);
-		}
-	}
-
 	function SetPerkCount(): Void
 	{
 		/*
 			arguments[0] = Perk points : Number
-		*/
-		/*
-			skse.Log("===== SetPerkCount =====");
-			for(var i = 0; i < arguments.length; i++) {
-				skse.Log("arguments[" + i + "] = " + arguments[i]);
-			}
-		*/
-		
+		*/		
 		// Show number of unassigned perk points
 		perkNotification.AddPerkTextInstance.buttonPCSpaceInstance._alpha = 0;
 		perkNotification.AddPerkTextInstance.buttonX360YInstance._alpha = 0;
@@ -274,6 +331,26 @@ class StatsMenu extends MovieClip
 		}
 	}
 	
+	function ShowLegendaryCounter(): Void
+	{
+		var skillLegendaryCount: Number = highlightSkillIndex + 3;
+		var descriptionCard: MovieClip = StatsMenu.StatsMenuInstance.DescriptionCardInstance;
+		if (SkillStatsA[skillLegendaryCount] != undefined) {
+			if ((SkillStatsA[skillLegendaryCount] > 0) && (!bHideLegendaryPrompts))
+			{
+				descriptionCard.legendaryCounter.counterTextField.html = true;
+				descriptionCard.legendaryCounter.counterTextField.htmlText = SkillStatsA[skillLegendaryCount];
+				descriptionCard.legendaryCounter._x = -8.5;
+				descriptionCard.legendaryCounter._y = descriptionCard.CardDescriptionTextInstance._y - 10.0;
+				descriptionCard.legendaryCounter._alpha = 100;
+			} else {
+				descriptionCard.legendaryCounter._alpha = 0;
+			}
+		} else {
+			descriptionCard.legendaryCounter._alpha = 0;
+		}
+	}
+	
 	function SetLegendaryButton(akButton: Object) {
 		var xSpacer: Number = 10.0;
 		
@@ -282,69 +359,11 @@ class StatsMenu extends MovieClip
 
 		akButton._alpha = 100;
 	}
-
-	static function SetPlatform(): Void
-	{
-		/*
-			arguments[0] = ? : Number
-			arguments[1] = ? : Boolean
-		*/
-		/*
-			skse.Log("===== SetPlatform =====");
-			for(var i = 0; i < arguments.length; i++) {
-				skse.Log("arguments[" + i + "] = " + arguments[i]);
-			}
-		*/
-		
-		StatsMenu.StatsMenuInstance.AddPerkButtonInstance.SetPlatform(arguments[0], arguments[1]);
-		StatsMenu.StatsMenuInstance.Platform = arguments[0];
-	}
-
-	function UpdateCamera(): Void
-	{
-		/*
-		skse.Log("===== UpdateCamera =====");
-		for(var i = 0; i < arguments.length; i++) {
-			skse.Log("arguments[" + i + "] = " + arguments[i]);
-		}
-		*/
-		
-		if (StatsMenu.StatsMenuInstance.CameraMovementInstance._currentFrame < 100) {
-			var nextFrame: Number = StatsMenu.StatsMenuInstance.CameraMovementInstance._currentFrame + 8;
-			if (nextFrame > 100) {
-				nextFrame = 100;
-			}
-			GameDelegate.call("MoveCamera", [CameraMovementInstance.CameraPositionAlpha._alpha / 100]);
-			return;
-		}
-		clearInterval(CameraUpdateInterval);
-		CameraUpdateInterval = 0;
-	}
-
-	static function StartCameraAnimation(): Void
-	{
-		/*
-		skse.Log("===== StartCameraAnimation =====");
-		for(var i = 0; i < arguments.length; i++) {
-			skse.Log("arguments[" + i + "] = " + arguments[i]);
-		}
-		*/
-		
-		clearInterval(StatsMenu.StatsMenuInstance.CameraUpdateInterval);
-		GameDelegate.call("MoveCamera", [0]);
-		StatsMenu.StatsMenuInstance.CameraUpdateInterval = setInterval(Delegate.create(StatsMenu.StatsMenuInstance, StatsMenu.StatsMenuInstance.UpdateCamera), 41);
-	}
+	
+	// Skill meters
 
 	function UpdateSkillList(): Void // Set the names of skills here
 	{
-		/*
-			skse.Log("===== UpdateSkillList =====");		
-			//for(var i = 1; i < StatsMenu.SkillStatsA.length; i += 5) {
-			for(var i = 0; i < StatsMenu.SkillStatsA.length; i += 1) {
-				skse.Log("SkillStatsA[" + i + "] = " + StatsMenu.SkillStatsA[i]);
-			}
-		*/
-		
 		/*
 			Each skill has 5 elements in StatsMenu.SkillStatsA (90 elements / 18 skills).
 			
@@ -375,199 +394,56 @@ class StatsMenu extends MovieClip
 			}
 		}
 		
+		if (!bShowSkillModifiers)
+		{
+			setSkillMarkerLabels();
+		}
+	}
+	
+	function setSkillMarkerLabels(): Void
+	{
 		for(var i: Number = 0; i < 18; i++) {
 			var skillLevel: Number = (i * 5);
 			var skillName: Number = skillLevel + 1;
 			var skillProgress: Number = skillLevel + 2;
 			var skillColor: Number = skillLevel + 3;
 			SkillMarkers[i].LabelInstance.html = true;
-			SkillMarkers[i].LabelInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + (StatsMenu.SkillStatsA[skillName].toString().toUpperCase())  + "</font>" + " <font color=\'" + StatsMenu.SkillStatsA[skillColor] + "\'>" + StatsMenu.SkillStatsA[skillLevel].toString().toUpperCase() + "</font>";
+			if ((SkillBasesA != null) && (SkillBasesA.length > 0))
+			{
+				var modifier: Number = Math.round(StatsMenu.SkillStatsA[skillLevel] - SkillBasesA[i]);
+				if ((!isNaN(modifier)) && (modifier != 0))
+				{
+					if (modifier > 0)
+					{
+						SkillMarkers[i].LabelInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + (StatsMenu.SkillStatsA[skillName].toString().toUpperCase())  + "</font> <font color=\'#FFFFFF\'>" + SkillBasesA[i].toString().toUpperCase() + " (+" + modifier.toString().toUpperCase() + ")</font>";
+					}
+					else
+					{
+						SkillMarkers[i].LabelInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + (StatsMenu.SkillStatsA[skillName].toString().toUpperCase())  + "</font> <font color=\'#FFFFFF\'>" + SkillBasesA[i].toString().toUpperCase() + " (" + modifier.toString().toUpperCase() + ")</font>";
+					}
+				}
+				else
+				{
+					SkillMarkers[i].LabelInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + (StatsMenu.SkillStatsA[skillName].toString().toUpperCase())  + "</font> <font color=\'#FFFFFF\'>" + SkillBasesA[i].toString().toUpperCase() + "</font>";
+				}
+			}
+			else
+			{
+				SkillMarkers[i].LabelInstance.htmlText = "<font face=\'$EverywhereMediumFont\'>" + (StatsMenu.SkillStatsA[skillName].toString().toUpperCase())  + "</font> <font color=\'" + StatsMenu.SkillStatsA[skillColor] + "\'>" + StatsMenu.SkillStatsA[skillLevel].toString().toUpperCase() + "</font>";
+			}
 			var ShortBar: Meter = new Meter(SkillMarkers[i].ShortBar);
 			ShortBar.SetPercent(StatsMenu.SkillStatsA[skillProgress]);
 		}
 	}
 	
-	public function initializeHighlighting(aIndex: Number): Void
-	{
-		//skse.Log("===== initializeHighlighting = " + aIndex + " =====");
-		if(aIndex >= 0){
-			highlightSkillIndex = (aIndex * 5) +1;
-		}
-		updateHighlightedSkill();
-		highlightingInitialized = true;
-	}
-
-	public function setAspectRatio(aIndex: Number): Void
-	{
-		var xOrigin: Number = Math.abs(backgroundBarLower.background._x) + 11; // = backgroundBarLower.background._x
-		var yOrigin: Number = 0; // 82
-		var yOffset: Number = 0; // 45
-		var xMultiplier: Number = 1.0; // 0.75
-		var slotWidth: Number = 150.0;
-		var markerWidth: Number = SkillMarkers[0]._width * SkillMarkers[0]._xscale;
-		if(aIndex == 0) // 4:3
-		{
-			xOrigin += 160;
-			yOrigin = 82;
-			yOffset = 45;
-			xMultiplier = 0.75;
-			slotWidth = ((720 / 3.0) * 4.0) / 6.0;
-		}
-		else if(aIndex == 1) // 5:4
-		{
-			xOrigin += 190;
-			yOrigin = 82;
-			yOffset = 45;
-			xMultiplier = 0.75;
-			slotWidth = ((720 / 4.0) * 5.0) / 6.0;
-		}
-		else if(aIndex == 2) // 16:9
-		{
-			xOrigin += 0;
-			yOrigin = 82;
-			yOffset = 45;
-			xMultiplier = 1.0;
-			slotWidth = ((720 / 9.0) * 16.0) / 6.0;
-		}
-		else if(aIndex == 3) // 16:10
-		{
-			xOrigin += 64;
-			yOrigin = 82;
-			yOffset = 45;
-			xMultiplier = 1.0;
-			slotWidth = ((720 / 10.0) * 16.0) / 6.0;
-		}
-		var markerSpacer: Number = (slotWidth - markerWidth) / 2.0;
-
-		//Bottom row = Mage
-		SkillMarkers[13]._x = xOrigin + slotWidth / 2.0;
-		SkillMarkers[13]._y = yOrigin;
-		for(var i: Number = 14; i < 18; i++) {
-			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
-			SkillMarkers[i]._y = SkillMarkers[13]._y;
-		}
-		SkillMarkers[0]._x = SkillMarkers[17]._x + slotWidth;
-		SkillMarkers[0]._y = SkillMarkers[13]._y;
-		
-		//Middle row = Thief
-		SkillMarkers[7]._x = SkillMarkers[13]._x;
-		SkillMarkers[7]._y = SkillMarkers[13]._y - yOffset;
-		for(var i: Number = 8; i < 13; i++) {
-			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
-			SkillMarkers[i]._y = SkillMarkers[7]._y;
-		}
-		
-		//Top row = Warrior
-		SkillMarkers[1]._x = SkillMarkers[13]._x;
-		SkillMarkers[1]._y = SkillMarkers[7]._y - yOffset;
-		for(var i: Number = 2; i < 7; i++) {
-			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
-			SkillMarkers[i]._y = SkillMarkers[1]._y;
-		}
-	}
-	
-	
-
-	function SetDirection(): Void //aAngle: Number): Void
-	{
-		//skse.Log("===== SetDirection (frame: " + StatsMenu.StatsMenuInstance._currentframe + ") =====");
-		/*
-			arguments[0] = Angle: Number
-			
-		skse.Log("===== SetDirection =====");
-		for(var i = 0; i < arguments.length; i++) {
-			skse.Log("arguments[" + i + "] = " + arguments[i]);
-		}
-		*/
-		currentAngle = arguments[0];
-	}
-	
-	var currentAngle: Number = 300;
-
-	function SetPlayerInfo(): Void
-	{
-		/*
-			arguments[0] = Player name: string
-			arguments[1] = Player level: number
-			arguments[2] = Player level progress in percent: number
-			arguments[3] = Player race: string
-			arguments[4] = Magicka current: number
-			arguments[5] = Magicka max: number
-			arguments[6] = Magicka color: number
-			arguments[7] = Health current: number
-			arguments[8] = Health max: number
-			arguments[9] = Health color: number
-			arguments[10] = Stamina current: number
-			arguments[11] = Stamina max: number
-			arguments[12] = Stamina color: number
-		*/
-		/*
-		skse.Log("===== SetPlayerInfo =====");
-		for(var i = 0; i < arguments.length; i++) {
-			skse.Log("arguments[" + i + "] = " + arguments[i]);
-		}
-		*/
-		
-		playerName = arguments[0];
-		playerRace = arguments[3];
-		playerLevel = arguments[1];
-		playerLevelProgress = arguments[2];
-		
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.textAutoSize = "shrink";
-		
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.html = true;
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[0] + "</font>";
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.html = true;
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[1] + "</font>";
-		if (LevelMeter == undefined) {
-			LevelMeter = new Meter(StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.animate);
-		}
-		LevelMeter.SetPercent(arguments[2]);
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.html = true;
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[3] + "</font>";
-		SetMeter(0, arguments[4], arguments[5], arguments[6]);
-		SetMeter(1, arguments[7], arguments[8], arguments[9]);
-		SetMeter(2, arguments[10], arguments[11], arguments[12]);
-		
-		updatePlayerInfo();
-		if(StatsMenu.SkillStatsA.length <= 0) {
-			backgroundBarLower._alpha = 0;
-		}
-	}
-	
-	var playerName: String = "";
-	var playerRace: String = "";
-	var playerLevel: Number = 1;
-	var playerLevelProgress: Number = 0;
-	
-	function updatePlayerInfo(): Void
-	{
-		//skse.Log("===== updatePlayerInfo =====");
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.SetText(playerName);
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.SetText(playerRace);
-		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.SetText(playerLevel);
-		if (LevelMeter == undefined) {
-			LevelMeter = new Meter(StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.animate);
-		}
-		LevelMeter.SetPercent(playerLevelProgress);
-	}
-
 	function SetMeter(): Void
 	{
-		//skse.Log("===== SetMeter =====");
 		/*
 			arguments[0] = Meter: Number (0 -> Magicka, 1 -> Health, 2 -> Stamina)
 			arguments[1] = Current: Number
 			arguments[2] = Max: Number
 			arguments[3] = Color: Number (string?)
 		*/
-		/*
-			skse.Log("===== SetMeter =====");
-			for(var i = 0; i < arguments.length; i++) {
-				skse.Log("arguments[" + i + "] = " + arguments[i]);
-			}
-		*/
-		
 		if (arguments[0] >= StatsMenu.MAGICKA_METER && arguments[0] <= StatsMenu.STAMINA_METER) {
 			var meterPercent: Number = 100 * (Math.max(0, Math.min(arguments[1], arguments[2])) / arguments[2]);
 			
@@ -584,25 +460,16 @@ class StatsMenu extends MovieClip
 			}
 			
 			StatsMenu.MeterText[arguments[0]].html = true;
-			if (arguments[3] == undefined) {
-				StatsMenu.MeterText[arguments[0]].SetText("<font face=\'$EverywhereMediumFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>", true);
-			} else {
-				StatsMenu.MeterText[arguments[0]].SetText("<font face=\'$EverywhereMediumFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>", true);
-			}
+			StatsMenu.MeterText[arguments[0]].SetText("<font face=\'$EverywhereMediumFont\' color=\'" + arguments[3] + "\'>" + arguments[1] + "/" + arguments[2] + "</font>", true);
 			StatsMenu.MagickaMeter.Update();
 			StatsMenu.HealthMeter.Update();
 			StatsMenu.StaminaMeter.Update();
 		}
 	}
 
-	private var bPerkMode: Boolean = false;
-	var highlightSkillIndex: Number = 76;
-	var highlightSkillAngle: Number = 300;
-
 	function updateHighlightedSkill(): Void
 	{
 		if(backgroundBarLower._alpha == 100) {
-			//skse.Log("===== updateHighlightedSkill =====");
 			if(highlightingInitialized == true) {
 				highlightSkillAngle = ((highlightSkillIndex - 1) / 5) * 20;
 			} else {
@@ -620,7 +487,6 @@ class StatsMenu extends MovieClip
 	function updateHighlightedIndex(): Void
 	{
 		if(backgroundBarLower._alpha == 100) {
-			//skse.Log("===== updateHighlightedIndex =====");
 			if(currentAngle < highlightSkillAngle) {
 				if(currentAngle < 20) {
 					highlightSkillIndex = 1;
@@ -641,7 +507,78 @@ class StatsMenu extends MovieClip
 		}
 	}
 	
-	var previousDescription: String = "Init";
+	// Player info
+	
+	function SetPlayerInfo(): Void
+	{
+		/*
+			arguments[0] = Player name: string
+			arguments[1] = Player level: number
+			arguments[2] = Player level progress in percent: number
+			arguments[3] = Player race: string
+			arguments[4] = Magicka current: number
+			arguments[5] = Magicka max: number
+			arguments[6] = Magicka color: number
+			arguments[7] = Health current: number
+			arguments[8] = Health max: number
+			arguments[9] = Health color: number
+			arguments[10] = Stamina current: number
+			arguments[11] = Stamina max: number
+			arguments[12] = Stamina color: number
+		*/		
+		playerName = arguments[0];
+		playerRace = arguments[3];
+		playerLevel = arguments[1];
+		playerLevelProgress = arguments[2];
+		
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.textAutoSize = "shrink";
+		
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.html = true;
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[0] + "</font>";
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.html = true;
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[1] + "</font>";
+		if (LevelMeter == undefined) {
+			LevelMeter = new Meter(StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.animate);
+		}
+		LevelMeter.SetPercent(arguments[2]);
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.html = true;
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.htmlText = "<font face=\'$EverywhereMediumFont\'>" + arguments[3] + "</font>";
+
+		AttributesA = new Array();
+		AttributesA.push(arguments[4]);
+		AttributesA.push(arguments[5]);
+		AttributesA.push(arguments[6]);
+		AttributesA.push(arguments[7]);
+		AttributesA.push(arguments[8]);
+		AttributesA.push(arguments[9]);
+		AttributesA.push(arguments[10]);
+		AttributesA.push(arguments[11]);
+		AttributesA.push(arguments[12]);
+		
+		if (!bPlayerInfoUpdateRequested)
+		{
+			bPlayerInfoUpdateRequested = true;
+			skse.SendModEvent("EXUI_OnPlayerInfoUpdate");
+		}
+		
+		updatePlayerInfo();
+		if(StatsMenu.SkillStatsA.length <= 0) {
+			backgroundBarLower._alpha = 0;
+		}
+	}
+	
+	function updatePlayerInfo(): Void
+	{
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.FirstLastLabel.SetText(playerName);
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.RacevalueLabel.SetText(playerRace);
+		StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.LevelNumberLabel.SetText(playerLevel);
+		if (LevelMeter == undefined) {
+			LevelMeter = new Meter(StatsMenu.StatsMenuInstance.backgroundBarUpper.TopPlayerInfo.animate);
+		}
+		LevelMeter.SetPercent(playerLevelProgress);
+	}
+	
+	// Skill/perk descriptions
 
 	function SetDescriptionCard(): Void
 	{
@@ -654,14 +591,7 @@ class StatsMenu extends MovieClip
 			arguments[5] = Relevant skill level : Number
 			arguments[6] = Perk relevant skill level: String
 			arguments[7] = ?: Number (Skills only)
-		*/
-		/*
-			skse.Log("===== SetDescriptionCard =====");
-			for(var i = 0; i < arguments.length; i++) {
-				skse.Log("arguments[" + i + "] = " + arguments[i]);
-			}
-		*/
-		
+		*/		
 		if(previousDescription != arguments[3]) {
 			previousDescription = arguments[3];
 			if(arguments[0]) {
@@ -741,28 +671,172 @@ class StatsMenu extends MovieClip
 		descriptionCard.CardDescriptionTextInstance._height = descriptionCard.CardDescriptionTextInstance.textHeight + 4.0;
 	}
 	
-	function ShowLegendaryCounter(): Void
+	// ==== Public functions ====
+	// Papyrus API
+	
+	// Sets whether or not UI elements related to Legendary skills should be hidden.
+	public function setHideLegendaryPrompts(abFlag: Boolean): Void
 	{
-		var skillLegendaryCount: Number = highlightSkillIndex + 3;
-		var descriptionCard: MovieClip = StatsMenu.StatsMenuInstance.DescriptionCardInstance;
-		if (SkillStatsA[skillLegendaryCount] != undefined) {
-			if ((SkillStatsA[skillLegendaryCount] > 0) && (!bHideLegendaryPrompts))
+		bHideLegendaryPrompts = abFlag;
+	}
+	
+	// Sets whether or not to show the values of skills with modifiers (true) or modified text colors (false).
+	public function setShowSkillModifiers(abFlag: Boolean): Void
+	{
+		bShowSkillModifiers = abFlag;
+	}
+	
+	// Shows (de)buffed attributes with modified text colors.
+	public function setMetersOriginal(): Void
+	{
+		SetMeter(0, AttributesA[0], AttributesA[1], AttributesA[2]);
+		SetMeter(1, AttributesA[3], AttributesA[4], AttributesA[5]);
+		SetMeter(2, AttributesA[6], AttributesA[7], AttributesA[8]);
+	}
+	
+	// Shows (de)buffed attributes with modifiers.
+	public function setMetersModified(): Void
+	{
+		/*
+			0 = Base value magicka
+			1 = Base value health
+			2 = Base value stamina
+		*/		
+		for (var i: Number = 0; i < 3; i++)
+		{
+			var percent: Number = 100 * (Math.max(0, Math.min(AttributesA[3 * i], AttributesA[3 * i + 1])) / AttributesA[3 * i + 1]);
+			var modifier: Number = AttributesA[3 * i + 1] - arguments[i];
+			var skillText: String = "<font face=\'$EverywhereMediumFont\'>" + Math.ceil(AttributesA[3 * i]) + "/" + Math.ceil(arguments[i]);
+			if ((!isNaN(modifier)) && (modifier != 0))
 			{
-				descriptionCard.legendaryCounter.counterTextField.html = true;
-				descriptionCard.legendaryCounter.counterTextField.htmlText = SkillStatsA[skillLegendaryCount];
-				descriptionCard.legendaryCounter._x = -8.5;
-				descriptionCard.legendaryCounter._y = descriptionCard.CardDescriptionTextInstance._y - 10.0;
-				descriptionCard.legendaryCounter._alpha = 100;
-			} else {
-				descriptionCard.legendaryCounter._alpha = 0;
+				skillText += " (";
+				if (modifier > 0)
+				{
+					skillText += "+";
+				}
+				skillText += modifier + ")";
 			}
-		} else {
-			descriptionCard.legendaryCounter._alpha = 0;
+			skillText += "</font>";
+			
+			if (i == 0)
+			{
+				StatsMenu.MagickaMeter.SetPercent(percent);
+				StatsMenu.MeterText[0].html = true;				
+				StatsMenu.MeterText[0].SetText(skillText, true);
+				StatsMenu.MagickaMeter.Update();
+			}
+			else if (i == 1)
+			{
+				StatsMenu.HealthMeter.SetPercent(percent);
+				StatsMenu.MeterText[1].html = true;
+				StatsMenu.MeterText[1].SetText(skillText, true);
+				StatsMenu.HealthMeter.Update();
+			}
+			else if (i == 2)
+			{
+				StatsMenu.StaminaMeter.SetPercent(percent);
+				StatsMenu.MeterText[2].html = true;
+				StatsMenu.MeterText[2].SetText(skillText, true);
+				StatsMenu.StaminaMeter.Update();
+			}
 		}
 	}
 	
-	public function hideLegendaryPrompts(abFlag: Boolean): Void
+	// Base values of skills are sent here when skill modifiers should be shown.
+	public function setSkillBaseLevels(): Void
 	{
-		bHideLegendaryPrompts = abFlag;
+		if (arguments.length > 0)
+		{
+			SkillBasesA = new Array();
+			for (var i: Number = 0; i < arguments.length; i++)
+			{
+				SkillBasesA.push(arguments[i]);
+			}
+			setSkillMarkerLabels();
+		}		
+	}
+	
+	// Sets which skill marker should be highlighted. New Skyrim sessions reset to highlighting Destruction, but bookkeeping is necessary during a session.
+	public function initializeHighlighting(aIndex: Number): Void
+	{
+		if(aIndex >= 0){
+			highlightSkillIndex = (aIndex * 5) +1;
+		}
+		updateHighlightedSkill();
+		highlightingInitialized = true;
+	}
+
+	// Places UI elements so that they fit the given aspect ratio.
+	public function setAspectRatio(aIndex: Number): Void
+	{
+		var xOrigin: Number = Math.abs(backgroundBarLower.background._x) + 11; // = backgroundBarLower.background._x
+		var yOrigin: Number = 0; // 82
+		var yOffset: Number = 0; // 45
+		var xMultiplier: Number = 1.0; // 0.75
+		var slotWidth: Number = 150.0;
+		var markerWidth: Number = SkillMarkers[0]._width * SkillMarkers[0]._xscale;
+		
+		// Set values used to place skill markers relative to each other
+		if(aIndex == 0) // 4:3
+		{
+			xOrigin += 160;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 0.75;
+			slotWidth = ((720 / 3.0) * 4.0) / 6.0;
+		}
+		else if(aIndex == 1) // 5:4
+		{
+			xOrigin += 190;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 0.75;
+			slotWidth = ((720 / 4.0) * 5.0) / 6.0;
+		}
+		else if(aIndex == 2) // 16:9
+		{
+			xOrigin += 0;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 1.0;
+			slotWidth = ((720 / 9.0) * 16.0) / 6.0;
+		}
+		else if(aIndex == 3) // 16:10
+		{
+			xOrigin += 64;
+			yOrigin = 82;
+			yOffset = 45;
+			xMultiplier = 1.0;
+			slotWidth = ((720 / 10.0) * 16.0) / 6.0;
+		}
+		
+		var markerSpacer: Number = (slotWidth - markerWidth) / 2.0;
+
+		// Place skill markers
+		// Bottom row = Mage skills
+		SkillMarkers[13]._x = xOrigin + slotWidth / 2.0;
+		SkillMarkers[13]._y = yOrigin;
+		for(var i: Number = 14; i < 18; i++) {
+			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
+			SkillMarkers[i]._y = SkillMarkers[13]._y;
+		}
+		SkillMarkers[0]._x = SkillMarkers[17]._x + slotWidth;
+		SkillMarkers[0]._y = SkillMarkers[13]._y;
+		
+		// Middle row = Thief skills
+		SkillMarkers[7]._x = SkillMarkers[13]._x;
+		SkillMarkers[7]._y = SkillMarkers[13]._y - yOffset;
+		for(var i: Number = 8; i < 13; i++) {
+			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
+			SkillMarkers[i]._y = SkillMarkers[7]._y;
+		}
+		
+		// Top row = Warrior skills
+		SkillMarkers[1]._x = SkillMarkers[13]._x;
+		SkillMarkers[1]._y = SkillMarkers[7]._y - yOffset;
+		for(var i: Number = 2; i < 7; i++) {
+			SkillMarkers[i]._x = SkillMarkers[i - 1]._x + slotWidth;
+			SkillMarkers[i]._y = SkillMarkers[1]._y;
+		}
 	}
 }

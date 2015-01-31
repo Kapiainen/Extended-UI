@@ -14,6 +14,8 @@ Event OnPageReset(string a_page)
 	AddHeaderOption("$EXUI_STATSMENUTITLE")
 	AddMenuOptionST("menuStatsMenuAspectRatio", "$EXUI_STATSMENUASPECTRATIO", sStatsMenuAspectRatios[iStatsMenuAspectRatio])
 	AddToggleOptionST("hideLegendaryPrompts", "$EXUI_HIDELEGENDARYPROMPTS", bHideLegendaryPrompts)
+	AddToggleOptionST("showAttributeModifiers", "$EXUI_SHOWATTRIBUTEMODIFIERS", bShowAttributeModifiers)
+	AddToggleOptionST("showSkillModifiers", "$EXUI_SHOWSKILLMODIFIERS", bShowSkillModifiers)
 	SetCursorPosition(1)
 	AddHeaderOption("$EXUI_CONSOLETITLE")
 	AddToggleOptionST("toggleConsoleFullscreen", "$EXUI_CONSOLEFULLSCREEN", bConsoleFullscreen)
@@ -92,6 +94,30 @@ State hideLegendaryPrompts
 	EndEvent
 EndState
 
+State showAttributeModifiers
+	Event OnSelectST()
+		bShowAttributeModifiers = !bShowAttributeModifiers
+		SetToggleOptionValueST(bShowAttributeModifiers)
+	EndEvent
+
+	Event OnDefaultST()
+		bShowAttributeModifiers = False
+		SetToggleOptionValueST(bShowAttributeModifiers)
+	EndEvent
+EndState
+
+State showSkillModifiers
+	Event OnSelectST()
+		bShowSkillModifiers = !bShowSkillModifiers
+		SetToggleOptionValueST(bShowSkillModifiers)
+	EndEvent
+
+	Event OnDefaultST()
+		bShowSkillModifiers = False
+		SetToggleOptionValueST(bShowSkillModifiers)
+	EndEvent
+EndState
+
 ;Private variables
 String[] sStatsMenuAspectRatios
 
@@ -101,6 +127,8 @@ Float Property fSleepWaitMaximum = 24.0 Auto Hidden
 Bool Property bConsoleFullscreen = False Auto Hidden
 Int Property iStatsMenuAspectRatio = 2 Auto Hidden
 Bool Property bHideLegendaryPrompts = False Auto Hidden
+Bool Property bShowAttributeModifiers = False Auto Hidden
+Bool Property bShowSkillModifiers = False Auto Hidden
 
 ;Script versioning
 Int Function GetVersion()
