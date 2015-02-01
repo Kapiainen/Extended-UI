@@ -6,7 +6,7 @@ Requirements:
 
 Compiling the Flash source files requires:
 - Adobe Flash Professional CS4 (10.0.2)
-- [Unofficial UI SDK](https://github.com/Mardoxx/skyrimui)
+- [Unofficial Skyrim UI SDK](https://github.com/Mardoxx/skyrimui)
 
 Credits:
 - SkyUI team for making the Unofficial UI SDK.
