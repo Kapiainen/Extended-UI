@@ -80,7 +80,7 @@ Translations:
 Polish - markosboss
 Russian - kopasov
 French - Sita
-German - 9Strike
+German - 9Strike, pStyl3
 
 
 --How to contact the author--
