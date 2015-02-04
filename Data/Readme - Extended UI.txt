@@ -23,9 +23,11 @@ Menus that this mod currently affects:
  - Superfluous UI elements slide out of the way when switching to browsing perks.
  - More perk names are visible at the same time.
  - Support for longer skill and perk descriptions.
+ - Ability to hide UI elements related to Legendary skills.
+ - Show (de)buffs to attributes and skills as base value +/- modifier instead of the default tinted text.
 
 -Sleep/wait menu-
- - Adjustable maximum sleeping/waiting value (2-720 hours).
+ - Adjustable maximum sleeping/waiting value (2-999 hours).
 
 -Console-
  - The name and FormID is shown for the cell that the player is currently in.
