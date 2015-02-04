@@ -1,5 +1,5 @@
 Extended UI
-Version: 1.2.0
+Version: 1.2.0a
 Author: MrJack
 
 Table of contents
@@ -90,6 +90,9 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 
 --Changelog--
+1.2.0a:
+	- Added Russian translation
+
 1.2.0:
 	- Added option to hide UI elements relevant to Legendary skills
 	- Added options to show (de)buffs as modifiers applied to the base values of attributes and skills
