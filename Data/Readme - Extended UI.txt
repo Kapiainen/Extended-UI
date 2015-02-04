@@ -77,7 +77,7 @@ SkyUI team for making the resources, which this mod is built upon, available to 
 SKSE team for all their hard work, which has made this mod possible.
 
 Translations:
-Polish - markosboss
+Polish - markosboss, Luke1987
 Russian - kopasov
 French - Sita
 German - 9Strike, pStyl3
