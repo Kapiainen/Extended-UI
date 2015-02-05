@@ -1,5 +1,5 @@
 Extended UI
-Version: 1.2.0a
+Version: 1.2.0b
 Author: MrJack
 
 Table of contents
@@ -83,6 +83,8 @@ Polish - markosboss, Luke1987
 Russian - kopasov
 French - Sita
 German - 9Strike, pStyl3
+Japanese - KiraHanato
+Spanish - HansRod
 
 
 --How to contact the author--
@@ -90,6 +92,10 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 
 --Changelog--
+1.2.0b:
+	- Added Japanese and Spanish translations
+	- Updated Polish translation
+
 1.2.0a:
 	- Added Russian translation
 
