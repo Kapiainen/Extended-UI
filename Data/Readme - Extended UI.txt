@@ -85,7 +85,7 @@ German - 9Strike, pStyl3
 Japanese - KiraHanato
 Spanish - HansRod
 Italian - BlackShruikan
-Czech - kast
+Czech - kastelan
 
 
 --How to contact the author--
