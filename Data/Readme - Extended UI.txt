@@ -93,10 +93,10 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 --Changelog--
 1.2.0c:
-  - Moved SkyUI from optional to required due to script issues when it is absent.
-  - Updated Russian translation
-  - Added Italian translation
-  - Updated Spanish translation
+	- Moved SkyUI from optional to required due to script issues when it is absent.
+	- Updated Russian translation
+	- Added Italian translation
+	- Updated Spanish translation
 
 1.2.0b:
 	- Added Japanese and Spanish translations
