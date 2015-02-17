@@ -80,7 +80,7 @@ SKSE team for all their hard work, which has made this mod possible.
 Translations:
 Polish - markosboss, Luke1987
 Russian - kopasov, adelinadragonborn
-French - Sita
+French - Sita, Sagittarius22
 German - 9Strike, pStyl3
 Japanese - KiraHanato
 Spanish - HansRod
@@ -95,6 +95,7 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 --Changelog--
 1.2.0d:
 	- Added Czech translation
+	- Added French translation
 
 1.2.0c:
 	- Moved SkyUI from optional to required due to script issues when it is absent.
