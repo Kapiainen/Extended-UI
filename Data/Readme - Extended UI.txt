@@ -79,7 +79,7 @@ SKSE team for all their hard work, which has made this mod possible.
 
 Translations:
 Polish - markosboss, Luke1987
-Russian - kopasov
+Russian - kopasov, adelinadragonborn
 French - Sita
 German - 9Strike, pStyl3
 Japanese - KiraHanato
