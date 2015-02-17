@@ -1,5 +1,5 @@
 Extended UI
-Version: 1.2.0b
+Version: 1.2.0c
 Author: MrJack
 
 Table of contents
@@ -25,6 +25,7 @@ Menus that this mod currently affects:
  - Support for longer skill and perk descriptions.
  - Ability to hide UI elements related to Legendary skills.
  - Show (de)buffs to attributes and skills as base value +/- modifier instead of the default tinted text.
+ - Ability to adjust the placement of skill markers at the bottom of the screen according to the aspect ratio (4:5, 5:4, 16:9, 16:10).
 
 -Sleep/wait menu-
  - Adjustable maximum sleeping/waiting value (2-999 hours).
@@ -43,9 +44,7 @@ Menus that this mod currently affects:
 --Requirements--
 Skyrim (>= 1.9.32.0.8)
 SKSE (>= 1.7.1)
-
--Optional, but highly recommended-
-SkyUI (>= 4.1) for configuring the mod.
+SkyUI (>= 4.1)
 
 
 --Compatibility--
@@ -85,6 +84,7 @@ French - Sita
 German - 9Strike, pStyl3
 Japanese - KiraHanato
 Spanish - HansRod
+Italian - BlackShruikan
 
 
 --How to contact the author--
@@ -92,6 +92,12 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 
 --Changelog--
+1.2.0c:
+  - Moved SkyUI from optional to required due to script issues when it is absent.
+  - Updated Russian translation
+  - Added Italian translation
+  - Updated Spanish translation
+
 1.2.0b:
 	- Added Japanese and Spanish translations
 	- Updated Polish translation
@@ -143,9 +149,9 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 1.0.2:
 	- Changed the fonts in the skills menu and rearranged the skill markers in the bottom bar.
 	- Added toggle for fullscreen console in MCM to always open the console in fullscreen mode.
-1.0.1:
 
+1.0.1:
 	- Standardized font in the upper bar in the Skills menu.
-	
+
 1.0.0:
 	- Initial release
