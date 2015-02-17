@@ -1,5 +1,5 @@
 Extended UI
-Version: 1.2.0c
+Version: 1.2.0d
 Author: MrJack
 
 Table of contents
@@ -85,6 +85,7 @@ German - 9Strike, pStyl3
 Japanese - KiraHanato
 Spanish - HansRod
 Italian - BlackShruikan
+Czech - kast
 
 
 --How to contact the author--
@@ -92,6 +93,9 @@ PM MrJack on the official Bethesda forums or mrpwn on Nexus.
 
 
 --Changelog--
+1.2.0d:
+	- Added Czech translation
+
 1.2.0c:
 	- Moved SkyUI from optional to required due to script issues when it is absent.
 	- Updated Russian translation
