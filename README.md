@@ -5,5 +5,5 @@ Compiling the Flash source files requires:
 - [Unofficial Skyrim UI SDK](https://github.com/Mardoxx/skyrimui)
 
 Credits:
-- SkyUI team for making the Unofficial UI SDK.
+- SkyUI team for making the Unofficial Skyrim UI SDK.
 - SKSE team.
